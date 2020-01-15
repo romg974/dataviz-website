@@ -26,6 +26,13 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+            integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+            crossorigin=""></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 </head>
 <body class="sans-serif">
 <header class="w-100 pa3 ph5-ns bg-white">
@@ -52,14 +59,20 @@
     </div>
 </header>
 <main class="w-100 bt b--black-10 bg-white">
-    <section class="bg-white black-80 pv3" id="presentation">
+    <section class="bg-white black-80 pv3" id="leaflet">
         <div class="ph3 ph5-ns pb4">
             <div class="center mw9">
-                <h3 class="f5 fw6 ttu tracke">Présentation</h3>
+                <h3 class="f5 fw6 ttu tracke">Quelques essais avec les maps</h3>
             </div>
             <div class="cf w-100 center mw9">
-                Le présent site a pour objectif de présenter mon travail dans le cadre du cours de DataScience de l'option Digital.e<br>
-
+                <div id="map" style="height:500px;"></div>
+            </div>
+        </div>
+    </section>
+    <section class="bg-lightest-blue black-80 pv3" id="d3js">
+        <div class="ph3 ph5-ns pb4">
+            <div class="center mw9">
+                <h3 class="f5 fw6 ttu tracke">Avec D3.js</h3>
             </div>
             <div class="cf w-100 center mw9 pv2">
                 <svg width="960" height="600"></svg>
@@ -112,8 +125,8 @@
   //mettre un htaccess
 
   d3.queue()
-    .defer(d3.json, "http://enjalot.github.io/wwsd/data/world/world-110m.geojson")
-    .defer(d3.csv, "http://francois.brucker.perso.centrale-marseille.fr/visible/mooc-countries.csv")
+    .defer(d3.json, "https://enjalot.github.io/wwsd/data/world/world-110m.geojson")
+    .defer(d3.csv, "data/mooc-countries.csv")
     .await(ready);
 
   function ready(error, topo, raw_data) {
@@ -139,6 +152,24 @@
       })
       .attr("d", path);
   }
+
+  var map = L.map('map').setView([43.3422865,5.4344886], 11);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  L.marker([43.34155,5.43826]).addTo(map)
+    .bindPopup('Centrale Marseille !')
+    .openPopup();
+
+  $.ajax({
+    dataType: "json",
+    url: "data/arrondissements.geojson",
+    success: function(data) {
+      L.geoJson(data).addTo(map);
+    }
+  }).error(function() {});
 </script>
 
 </body>
