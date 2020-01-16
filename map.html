@@ -187,16 +187,16 @@
   });
 
   // https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json
-  /*$.ajax({
+  $.ajax({
     dataType: "json",
-    url: "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json",
+    url: "data/schools.geojson",
     success: function(data) {
       L.geoJson(data, {
-        style: function(feature){
+        /*style: function(feature){
           if(visited.indexOf(feature.properties.code) != -1) return {color: '#FF0000', opacity:0.7};
-        },
+        },*/
         onEachFeature: function (feature, layer) {
-          //layer.bindPopup("("+feature.properties.code + ") " + feature.properties.nom);
+          layer.bindPopup(feature.properties.name);
           //layer.bindTooltip(feature.properties.nom, {permanent: true, direction: 'right'}).openTooltip();
         }
       }).addTo(map);
@@ -204,7 +204,7 @@
     error: function(){
       console.log('failed');
     }
-  });*/
+  });
 </script>
 
 </body>
