@@ -66,17 +66,18 @@
             </div>
             <div class="cf w-100 center mw9">
                 <div id="map" style="height:600px;"></div>
-                <i>En rouge, les départements que j'ai déjà visité en france, hors outre-mer. </i>
+                <i>En rouge, les départements que j'ai déjà visité en france, hors outre-mer. </i><br />
+                <i>Les différents marqueurs représentent certaines écoles en France. </i>
             </div>
         </div>
     </section>
     <section class="bg-lightest-blue black-80 pv3" id="d3js">
         <div class="ph3 ph5-ns pb4">
             <div class="center mw9">
-                <h3 class="f5 fw6 ttu tracke">Avec D3.js</h3>
+                <h3 class="f5 fw6 ttu tracke">Nombre d'accidents par département en 2018</h3>
             </div>
-            <div class="cf w-100 center mw9 pv2">
-                <svg width="960" height="600"></svg>
+            <div class="cf w-100 center mw9 pv2" style="text-align: center;">
+                <svg style="margin:auto;" width="960" height="1000"></svg>
             </div>
         </div>
     </section>
@@ -89,10 +90,26 @@
     width = +svg.attr("width"),
     height = +svg.attr("height");
 
+  var lattop = 51.6;
+  var lonleft = -5;
+  var lonright = 1.6;
+
   // Map and projection
   var projection = d3.geoNaturalEarth()
-    .scale(width / 2 / Math.PI)
-    .translate([width / 2, height / 2])
+
+  var scale = 360*width/(lonright-lonleft)/10;
+  projection.scale(scale);
+
+  projection.translate([0,0]);
+
+  // check where your top left coordinate is projected
+  var trans = projection([lonleft,lattop]);
+  // translate your map in the negative direction of that result
+  projection.translate([-1*trans[0],-1*trans[1]]);
+    //.scale(width / 2 / Math.PI)
+    //.translate([width / 2, height / 2])
+    //.scale(width / 2 / Math.PI)
+    //.translate([width / 2, height / 2])
   var path = d3.geoPath()
     .projection(projection);
 
@@ -101,7 +118,7 @@
   var colorScheme = d3.schemeReds[6];
   colorScheme.unshift("#eee")
   var colorScale = d3.scaleThreshold()
-    .domain([1, 6, 11, 26, 101, 1001])
+    .domain([1, 101, 251, 501, 751, 1001])
     .range(colorScheme);
 
   // Legend
@@ -113,7 +130,7 @@
     .attr("x", 0)
     .attr("y", -6)
     .text("Students");
-  var labels = ['0', '1-5', '6-10', '11-25', '26-100', '101-1000', '> 1000'];
+  var labels = ['0', '1-100', '101-250', '251-500', '501-750', '751-1000', '> 1000'];
   var legend = d3.legendColor()
     .labels(function (d) { return labels[d.i]; })
     .shapePadding(4)
@@ -126,8 +143,8 @@
   //mettre un htaccess
 
   d3.queue()
-    .defer(d3.json, "https://enjalot.github.io/wwsd/data/world/world-110m.geojson")
-    .defer(d3.csv, "data/mooc-countries.csv")
+    .defer(d3.json, "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson")
+    .defer(d3.csv, "data/accidents_by_dep.csv")
     .await(ready);
 
   function ready(error, topo, raw_data) {
@@ -135,8 +152,8 @@
     if (error) throw error;
 
     raw_data.forEach(function(d) {
-      data.set(d.code, +d.total);
-    })
+      data.set(d.dep, +d.nb);
+    });
 
 
     // Draw the map
@@ -147,7 +164,8 @@
       .enter().append("path")
       .attr("fill", function (d){
         // Pull data for this country
-        d.total = data.get(d.id) || 0;
+        console.log(d);
+        d.total = data.get(d.properties.code*10) || 0;
         // Set the color
         return colorScale(d.total);
       })
